@@ -6,6 +6,8 @@
   <title>HR Analytics Dashboard – Chelsea Bonyata</title>
   <!-- Tailwind CSS CDN for SaaS polish -->
   <script src="https://cdn.tailwindcss.com"></script>
+  <!-- PapaParse for robust CSV parsing -->
+  <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
   <link rel="icon" href="https://cdn.jsdelivr.net/gh/chelsbun/hr-analytics-dashboard/favicon.ico">
   <style>
     .fade-in { animation: fadein .6s; }
@@ -60,12 +62,17 @@
     <div class="bg-white rounded-2xl shadow-lg py-8 px-6 md:px-12 mb-8 fade-in" id="queryControls" style="display: none;">
       <h3 class="text-lg font-bold mb-2 text-indigo-700">Run Advanced SQL Analyses</h3>
       <div class="mb-3 text-sm text-gray-500">Click any button to demonstrate complex SQL skills:</div>
-      <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+      <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 mb-6">
         <button class="btn-hr-analytic" onclick="runDataQualityAudit()">🔍 Data Quality Audit</button>
         <button class="btn-hr-analytic" onclick="runCostAnalysis()">📊 Benefits Cost Analysis</button>
         <button class="btn-hr-analytic" onclick="runDemographicAnalysis()">👥 Demographic Analysis</button>
-        <button class="btn-hr-analytic" onclick="showIntegrationTools()">🔌 Integration Tools (EIB Simulation)</button>
         <button class="btn-hr-analytic" onclick="showReportWriter()">📋 Report Writer &amp; Calculated Fields</button>
+      </div>
+      <!-- Real Employee CSV Import -->
+      <div class="flex flex-col md:flex-row items-center gap-3">
+        <label class="text-base font-semibold text-indigo-700 mb-2 md:mb-0">Upload Employees CSV:</label>
+        <input type="file" id="empCSV" accept=".csv" class="bg-gray-100 rounded-lg p-2" />
+        <button class="btn-hr-analytic" onclick="handleEmpCSVImport()">⬆️ Import Employees (Real)</button>
       </div>
     </div>
 
@@ -76,7 +83,7 @@
           <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
           <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path>
         </svg>
-        <div class="text-lg text-indigo-700 font-semibold">Running complex SQL query...</div>
+        <div class="text-lg text-indigo-700 font-semibold">Processing...</div>
       </div>
     </div>
 
@@ -101,8 +108,8 @@
     window.runDataQualityAudit = runDataQualityAudit;
     window.runCostAnalysis = runCostAnalysis;
     window.runDemographicAnalysis = runDemographicAnalysis;
-    window.showIntegrationTools = showIntegrationTools;
     window.showReportWriter = showReportWriter;
+    window.handleEmpCSVImport = handleEmpCSVImport;
 
     function showToast(message, type = 'success') {
       const toast = document.getElementById('toast');
@@ -253,16 +260,6 @@
       }
     }
 
-    // Simulate Integration Tools (EIB)
-    function showIntegrationTools() {
-      renderResultsTable(null, 'Workday Integration Tools Simulation', `
-        <div class="flex flex-col items-center">
-          <button onclick="simulateDataImport()" class="btn-hr-analytic w-64">Import Employee Data</button>
-          <div class="mt-4 text-gray-600 text-sm">EIB-style data import and validation system</div>
-        </div>
-      `);
-    }
-
     // Report Writer (Demo)
     function showReportWriter() {
       renderResultsTable(null, 'Workday Report Writer &amp; Calculated Fields', `
@@ -310,20 +307,62 @@
       `);
     }
 
-    // Simulate Data Import
-    window.simulateDataImport = function() {
+    // REAL Employees CSV Import (the magic)
+    async function handleEmpCSVImport() {
+      if (!isConnected) return showToast('Connect to the database first!', 'error');
+      const fileInput = document.getElementById('empCSV');
+      const file = fileInput.files[0];
+      if (!file) return showToast('Please select a CSV file to import.', 'error');
+
       showLoading(true);
-      setTimeout(() => {
-        showLoading(false);
-        showToast('Sample data import completed!', 'success');
-        renderResultsTable(null, 'Integration Import Results', `
-          <div class="alert bg-green-100 text-green-800 font-semibold py-3 px-5 rounded-lg">
-            ✔️ Import successful. 18 new employees added.<br/>
-            No errors detected.
-          </div>
-        `);
-      }, 1500);
-    };
+      Papa.parse(file, {
+        header: true,
+        skipEmptyLines: true,
+        complete: async function(results) {
+          try {
+            // Remove empty-string fields, convert number fields, parse dates as needed
+            let cleanRows = results.data.map(row => {
+              // Remove fields not in table schema
+              let allowed = [
+                'employee_id', 'client_id', 'ssn', 'first_name', 'last_name', 'hire_date',
+                'birth_date', 'department', 'job_title', 'salary', 'manager_id',
+                'status', 'termination_date', 'created_date'
+              ];
+              let obj = {};
+              allowed.forEach(key => {
+                if (row[key] !== undefined) obj[key] = row[key] === "" ? null : row[key];
+              });
+              // Parse numbers
+              obj.employee_id = obj.employee_id ? Number(obj.employee_id) : null;
+              obj.client_id = obj.client_id ? Number(obj.client_id) : null;
+              obj.salary = obj.salary ? Number(obj.salary) : null;
+              obj.manager_id = obj.manager_id ? Number(obj.manager_id) : null;
+              return obj;
+            });
+
+            // Filter out totally empty rows (sometimes parser makes an empty trailing row)
+            cleanRows = cleanRows.filter(r => r.employee_id && r.first_name);
+
+            if (!cleanRows.length) throw new Error('No valid employees found in the CSV.');
+
+            // Insert or upsert
+            const { data, error } = await supabase.from('employees').upsert(cleanRows, { onConflict: ['employee_id'] });
+
+            showLoading(false);
+            if (error) throw error;
+
+            showToast(`${cleanRows.length} employees imported/updated successfully!`);
+          } catch (err) {
+            showLoading(false);
+            showToast('Import failed: ' + err.message, 'error');
+          }
+        },
+        error: function(err) {
+          showLoading(false);
+          showToast('CSV Parse error: ' + err.message, 'error');
+        }
+      });
+    }
 
     // Helper: Render Table or HTML
     function renderResultsTable(data, title = '', extraHtml = '') {
@@ -356,4 +395,3 @@
   </script>
 </body>
 </html>
-
