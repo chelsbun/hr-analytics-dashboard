@@ -131,8 +131,8 @@ Created by [Chelsea Bonyata](https://linkedin.com/in/chelsea-bonyata) as part of
 
 **Chelsea Bonyata**
 - 📧 Email: chelseabonyata@gmail.com
-- 💼 LinkedIn: [linkedin.com/in/chelsea-bonyata](https://linkedin.com/in/chelsea-bonyata)
-- 🐙 GitHub: [github.com/chelsbun](https://github.com/chelsbun)
+- 💼 LinkedIn: https://www.linkedin.com/in/chelsea-bonyata-477236152/
+- 🐙 GitHub: https://github.com/chelsbun
 
 ---
 
