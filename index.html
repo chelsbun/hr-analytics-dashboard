@@ -4,1159 +4,130 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>HR Analytics Dashboard - Chelsea Bonyata</title>
+    <!-- [Keep all your beautiful CSS styles here, unchanged for brevity] -->
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            padding: 20px;
-        }
-        
-        .container {
-            max-width: 1400px;
-            margin: 0 auto;
-        }
-        
-        .header {
-            background: white;
-            padding: 2rem;
-            border-radius: 15px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-            margin-bottom: 2rem;
-            text-align: center;
-        }
-        
-        .header h1 {
-            color: #333;
-            font-size: 2.5rem;
-            margin-bottom: 0.5rem;
-        }
-        
-        .header p {
-            color: #666;
-            font-size: 1.1rem;
-        }
-        
-        .controls {
-            background: white;
-            padding: 1.5rem;
-            border-radius: 15px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-            margin-bottom: 2rem;
-            text-align: center;
-        }
-        
-        .btn {
-            background: linear-gradient(45deg, #667eea, #764ba2);
-            color: white;
-            border: none;
-            padding: 12px 24px;
-            margin: 0 10px 10px 0;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 1rem;
-            font-weight: 600;
-            transition: transform 0.2s, box-shadow 0.2s;
-        }
-        
-        .btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
-        }
-        
-        .btn:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-            transform: none;
-        }
-        
-        .results {
-            background: white;
-            padding: 2rem;
-            border-radius: 15px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-            margin-bottom: 2rem;
-        }
-        
-        .results h2 {
-            color: #333;
-            margin-bottom: 1rem;
-            padding-bottom: 0.5rem;
-            border-bottom: 2px solid #667eea;
-        }
-        
-        .loading {
-            display: none;
-            text-align: center;
-            padding: 2rem;
-            color: #667eea;
-        }
-        
-        .spinner {
-            border: 4px solid #f3f3f3;
-            border-top: 4px solid #667eea;
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            animation: spin 1s linear infinite;
-            margin: 0 auto 1rem;
-        }
-        
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-        
-        .table-container {
-            overflow-x: auto;
-            margin-top: 1rem;
-        }
-        
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 1rem;
-        }
-        
-        th, td {
-            padding: 12px;
-            text-align: left;
-            border-bottom: 1px solid #ddd;
-        }
-        
-        th {
-            background-color: #f8f9fa;
-            font-weight: 600;
-            color: #333;
-        }
-        
-        tr:hover {
-            background-color: #f8f9fa;
-        }
-        
-        .error {
-            background: #fee;
-            color: #c33;
-            padding: 1rem;
-            border-radius: 8px;
-            border-left: 4px solid #c33;
-            margin: 1rem 0;
-        }
-        
-        .success {
-            background: #efe;
-            color: #363;
-            padding: 1rem;
-            border-radius: 8px;
-            border-left: 4px solid #363;
-            margin: 1rem 0;
-        }
-        
-        .metric-card {
-            background: linear-gradient(45deg, #667eea, #764ba2);
-            color: white;
-            padding: 1.5rem;
-            border-radius: 12px;
-            margin: 1rem 0;
-            text-align: center;
-        }
-        
-        .metric-value {
-            font-size: 2rem;
-            font-weight: bold;
-        }
-        
-        .metric-label {
-            font-size: 0.9rem;
-            opacity: 0.9;
-            margin-top: 0.5rem;
-        }
-        
-        .connection-status {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            padding: 10px 15px;
-            border-radius: 20px;
-            font-size: 0.9rem;
-            font-weight: 600;
-        }
-        
-        .connected {
-            background: #4caf50;
-            color: white;
-        }
-        
-        .disconnected {
-            background: #f44336;
-            color: white;
-        }
-        
-        .input-group {
-            margin: 10px 0;
-        }
-        
-        .input-group input {
-            padding: 10px;
-            width: 300px;
-            margin: 5px;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-        }
-        
-        .integration-panel {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 2rem;
-            margin: 2rem 0;
-        }
-        
-        .upload-area {
-            border: 2px dashed #667eea;
-            border-radius: 10px;
-            padding: 2rem;
-            text-align: center;
-            transition: all 0.3s ease;
-        }
-        
-        .upload-area:hover {
-            border-color: #764ba2;
-            background-color: #f8f9ff;
-        }
-        
-        .upload-area.dragover {
-            border-color: #764ba2;
-            background-color: #f0f4ff;
-        }
-        
-        .file-info {
-            background: #f8f9fa;
-            padding: 1rem;
-            border-radius: 8px;
-            margin: 1rem 0;
-            text-align: left;
-        }
-        
-        .status-indicator {
-            display: inline-block;
-            padding: 4px 12px;
-            border-radius: 12px;
-            font-size: 0.8rem;
-            font-weight: bold;
-            margin-left: 10px;
-        }
-        
-        .status-success { background: #d4edda; color: #155724; }
-        .status-warning { background: #fff3cd; color: #856404; }
-        .status-error { background: #f8d7da; color: #721c24; }
-        .status-processing { background: #cce5ff; color: #004085; }
-        
-        .report-builder {
-            background: #f8f9fa;
-            border: 1px solid #dee2e6;
-            border-radius: 10px;
-            padding: 1.5rem;
-            margin: 1rem 0;
-        }
-        
-        .field-selector {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 1rem;
-            margin: 1rem 0;
-        }
-        
-        .field-group {
-            background: white;
-            border: 1px solid #e9ecef;
-            border-radius: 6px;
-            padding: 1rem;
-        }
-        
-        .field-group h4 {
-            margin: 0 0 0.5rem 0;
-            color: #667eea;
-            font-size: 0.9rem;
-        }
-        
-        .field-checkbox {
-            display: block;
-            margin: 0.3rem 0;
-        }
-        
-        .field-checkbox input {
-            margin-right: 0.5rem;
-        }
-        
-        .calculated-field {
-            background: #e8f4fd;
-            border-left: 4px solid #667eea;
-            padding: 1rem;
-            margin: 1rem 0;
-            border-radius: 0 6px 6px 0;
-        }
-        
-        .calculated-field h4 {
-            color: #667eea;
-            margin: 0 0 0.5rem 0;
-        }
-        
-        .formula-display {
-            background: #2d3748;
-            color: #e2e8f0;
-            padding: 0.8rem;
-            border-radius: 4px;
-            font-family: 'Courier New', monospace;
-            font-size: 0.9rem;
-            margin: 0.5rem 0;
-        }
-        
-        .progress-bar {
-            width: 100%;
-            height: 20px;
-            background: #e9ecef;
-            border-radius: 10px;
-            overflow: hidden;
-            margin: 1rem 0;
-        }
-        
-        .progress-fill {
-            height: 100%;
-            background: linear-gradient(45deg, #667eea, #764ba2);
-            transition: width 0.5s ease;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 0.8rem;
-            font-weight: bold;
-        }
-            .header h1 {
-                font-size: 2rem;
-            }
-            
-            .btn {
-                display: block;
-                width: 100%;
-                margin: 10px 0;
-            }
-            
-            body {
-                padding: 10px;
-            }
-            
-            .input-group input {
-                width: 100%;
-                max-width: 300px;
-            }
-        }
+        /* ...Your full CSS above goes here... */
     </style>
 </head>
 <body>
     <div class="container">
-        <!-- Connection Status -->
-        <div id="connectionStatus" class="connection-status disconnected">
-            Database Disconnected
-        </div>
-        
-        <!-- Header -->
-        <div class="header">
+        <!-- Connection Status and Header [Unchanged] -->
+        <div id="connectionStatus" class="connection-status disconnected"><span>Database Disconnected</span></div>
+        <div class="glass-card header">
             <h1>HR Analytics Dashboard</h1>
-            <p>Demonstrating Advanced SQL & Workday-Ready Analytics</p>
-            <p><strong>Created by Chelsea Bonyata</strong> | Insperity Software Engineer Candidate</p>
+            <p>Advanced SQL & Workday-Ready Analytics Platform</p>
+            <p><strong>Created by Chelsea Bonyata</strong> | Insperity Software Engineer</p>
         </div>
-        
-        <!-- Database Connection -->
-        <div class="controls">
-            <h3>Database Configuration</h3>
-            <p style="margin-bottom: 1rem;">Your Supabase connection details:</p>
-            <div class="input-group">
-                <input type="url" id="supabaseUrl" placeholder="Supabase URL" readonly 
-                       value="https://jxohlvotednnxnyltibw.supabase.co">
-            </div>
-            <div class="input-group">
-                <input type="password" id="supabaseKey" placeholder="Supabase Key" readonly 
-                       value="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp4b2hsdm90ZWRubnhueWx0aWJ3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ1ODY1OTQsImV4cCI6MjA3MDE2MjU5NH0.gkUyFXw1Am6hZSRNPxgoEUNL8jteeoEtF8KWwxykrOY">
-            </div>
-            <button class="btn" onclick="connectToDatabase()">Connect to Database</button>
-        </div>
-        
-        <!-- Query Controls -->
-        <div class="controls" id="queryControls" style="display: none;">
-            <h3>Run Advanced SQL Analyses</h3>
-            <p style="margin-bottom: 1rem;">Click any button to demonstrate complex SQL skills:</p>
-            <button class="btn" onclick="runDataQualityAudit()">🔍 Data Quality Audit</button>
-            <button class="btn" onclick="runCostAnalysis()">📊 Benefits Cost Analysis</button>
-            <button class="btn" onclick="runDemographicAnalysis()">👥 Demographic Analysis</button>
-            <button class="btn" onclick="showIntegrationTools()">🔌 Integration Tools (EIB Simulation)</button>
-            <button class="btn" onclick="showReportWriter()">📋 Report Writer & Calculated Fields</button>
-        </div>
-        
-        <!-- Loading Indicator -->
-        <div class="loading" id="loading">
-            <div class="spinner"></div>
-            <p>Running complex SQL query...</p>
-        </div>
-        
-        <!-- Results Container -->
-        <div id="results"></div>
-    </div>
 
-    <!-- Load Supabase -->
+        <!-- Database Connection Panel -->
+        <div class="glass-card" id="connectionPanel">
+            <h3 style="margin-bottom: 1.5rem; color: var(--text-primary);">🔗 Database Configuration</h3>
+            <div class="input-group">
+                <label>Supabase URL</label>
+                <input type="url" id="supabaseUrl" placeholder="https://your-project.supabase.co" value="https://jxohlvotednnxnyltibw.supabase.co">
+            </div>
+            <div class="input-group">
+                <label>Supabase Anon Key</label>
+                <input type="password" id="supabaseKey" placeholder="Your anonymous key" value="YOUR_SUPABASE_KEY_HERE">
+            </div>
+            <div style="text-align: center; margin-top: 1.5rem;">
+                <button class="btn" onclick="connectToDatabase()"><span>⚡</span><span>Connect to Database</span></button>
+            </div>
+        </div>
+
+        <!-- Main Controls (Tabs) -->
+        <div class="glass-card" id="mainControls" style="display: none;">
+            <div class="tabs">
+                <button class="tab active" onclick="switchTab('analytics', event)">📊 Analytics</button>
+                <button class="tab" onclick="switchTab('upload', event)">📤 CSV Upload</button>
+                <button class="tab" onclick="switchTab('integration', event)">🔌 Integration Tools</button>
+                <button class="tab" onclick="switchTab('reports', event)">📋 Report Builder</button>
+            </div>
+            <!-- Analytics, Upload, Integration, Reports Tabs (unchanged) -->
+            <div id="analyticsTab" class="tab-content">...</div>
+            <div id="uploadTab" class="tab-content" style="display:none;">
+                <h3 style="margin-bottom: 1.5rem;">📤 CSV Data Upload</h3>
+                <div class="upload-area" id="uploadArea">
+                    <div class="upload-icon">📁</div>
+                    <p><strong>Drop CSV files here or click to browse</strong></p>
+                    <p style="color: var(--text-secondary); font-size: 0.9rem; margin-top: 0.5rem;">
+                        Supported: Employee data, Benefits enrollment, Payroll records
+                    </p>
+                    <input type="file" id="fileInput" accept=".csv" style="display: none;" multiple>
+                    <button class="btn btn-secondary" onclick="document.getElementById('fileInput').click()" style="margin-top: 1rem;">
+                        Select Files
+                    </button>
+                </div>
+                <div id="filePreview" style="display: none;">
+                    <div class="csv-preview">
+                        <h4 style="margin-bottom: 1rem;">📋 File Preview</h4>
+                        <div id="csvStats" class="csv-stats"></div>
+                        <div id="csvPreviewTable" class="table-container"></div>
+                        <div style="text-align: center; margin-top: 1.5rem;">
+                            <button class="btn btn-success" onclick="uploadToSupabase()"><span>🚀</span><span>Upload to Database</span></button>
+                            <button class="btn btn-secondary" onclick="clearUpload()"><span>❌</span><span>Clear</span></button>
+                        </div>
+                    </div>
+                </div>
+                <div id="uploadProgress" style="display: none;">
+                    <h4 style="margin-bottom: 1rem;">Upload Progress</h4>
+                    <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width: 0%">0%</div></div>
+                    <div id="uploadStatus"></div>
+                </div>
+            </div>
+            <!-- ... other tab divs ... -->
+        </div>
+
+        <!-- Loading Indicator -->
+        <div class="loading" id="loading"><div class="spinner"></div>
+            <p style="color: var(--primary); font-weight: 600;">Processing your request...</p>
+        </div>
+        <div id="results"></div>
+        <!-- Modal -->
+        <div id="modal" class="modal"><div class="modal-content"><div id="modalBody"></div>
+            <div style="text-align: right; margin-top: 1.5rem;">
+                <button class="btn btn-secondary" onclick="closeModal()">Close</button>
+            </div></div></div>
+    </div>
+    <!-- Papa Parse for CSV -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+    <!-- Supabase SDK -->
     <script type="module">
-        import { createClient } from 'https://cdn.skypack.dev/@supabase/supabase-js@2'
-        
-        let supabase = null;
-        let isConnected = false;
-        
-        // Make functions available globally
-        window.connectToDatabase = connectToDatabase;
-        window.runDataQualityAudit = runDataQualityAudit;
-        window.runCostAnalysis = runCostAnalysis;
-        window.runDemographicAnalysis = runDemographicAnalysis;
-        window.showIntegrationTools = showIntegrationTools;
-        window.showReportWriter = showReportWriter;
-        
-        // Connect to Supabase database
-        async function connectToDatabase() {
-            const url = document.getElementById('supabaseUrl').value;
-            const key = document.getElementById('supabaseKey').value;
-            
-            if (!url || !key) {
-                showError('Please enter both Supabase URL and API Key');
-                return;
-            }
-            
-            try {
-                showLoading(true);
-                supabase = createClient(url, key);
-                
-                // Test connection with a simple query
-                const { data, error } = await supabase
-                    .from('clients')
-                    .select('company_name')
-                    .limit(1);
-                
-                if (error) throw error;
-                
-                isConnected = true;
-                updateConnectionStatus(true);
-                document.getElementById('queryControls').style.display = 'block';
-                showSuccess('Connected to database successfully! Found ' + data.length + ' clients.');
-                
-            } catch (error) {
-                console.error('Connection error:', error);
-                showError('Failed to connect to database: ' + error.message);
-                updateConnectionStatus(false);
-            } finally {
-                showLoading(false);
-            }
+        import { createClient } from 'https://cdn.skypack.dev/@supabase/supabase-js@2';
+        // ... All your global variables and functions, almost exactly as before ...
+        // Only show actual upload status, never fake success
+        // Show download option for successful uploads (demo only: download the original CSV, can customize)
+        // Remove any references to a "public.run_sql(query)" function unless you want to add that backend function
+
+        // ... copy your previous script section here, keeping all your detailed upload, preview, and feedback logic ...
+        // ... make sure to replace any old "download" logic with this:
+        function enableDownloadButton() {
+            const statusDiv = document.getElementById('uploadStatus');
+            const downloadBtn = document.createElement('button');
+            downloadBtn.className = 'btn btn-success';
+            downloadBtn.innerHTML = '<span>⬇️</span><span>Download Uploaded Data</span>';
+            downloadBtn.onclick = () => {
+                if (!currentFile) return;
+                const url = URL.createObjectURL(currentFile);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = currentFile.name || 'uploaded.csv';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+            };
+            statusDiv.appendChild(downloadBtn);
         }
-        
-        // Integration Tools Simulation (EIB-style)
-        function showIntegrationTools() {
-            if (!isConnected) {
-                showError('Please connect to the database first');
-                return;
-            }
-            
-            const integrationHTML = `
-                <div class="results">
-                    <h2>🔌 Workday Integration Tools Simulation</h2>
-                    <p>Enterprise Interface Builder (EIB) - style data import and validation system</p>
-                    
-                    <div class="integration-panel">
-                        <div>
-                            <h3>📁 File Upload & Validation</h3>
-                            <div class="upload-area" id="uploadArea">
-                                <p><strong>Drop CSV file here or click to browse</strong></p>
-                                <p style="color: #666; font-size: 0.9rem;">Supported formats: Employee data, Benefits enrollment, Payroll records</p>
-                                <input type="file" id="fileInput" accept=".csv" style="display: none;">
-                                <button class="btn" onclick="document.getElementById('fileInput').click()">Select File</button>
-                            </div>
-                            
-                            <div id="fileDetails" style="display: none;" class="file-info">
-                                <h4>📋 File Analysis</h4>
-                                <div id="fileStats"></div>
-                                <button class="btn" onclick="simulateDataImport()">🚀 Process Import</button>
-                            </div>
-                        </div>
-                        
-                        <div>
-                            <h3>🔄 Integration Status Monitor</h3>
-                            <div style="background: white; border: 1px solid #ddd; border-radius: 8px; padding: 1rem;">
-                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-                                    <span><strong>Employee Data Sync</strong></span>
-                                    <span class="status-indicator status-success">✅ ACTIVE</span>
-                                </div>
-                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-                                    <span><strong>Benefits Enrollment</strong></span>
-                                    <span class="status-indicator status-warning">⚠️ PENDING</span>
-                                </div>
-                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-                                    <span><strong>Payroll Integration</strong></span>
-                                    <span class="status-indicator status-processing">🔄 RUNNING</span>
-                                </div>
-                                <div style="display: flex; justify-content: space-between; align-items: center;">
-                                    <span><strong>Data Quality Check</strong></span>
-                                    <span class="status-indicator status-error">❌ FAILED</span>
-                                </div>
-                            </div>
-                            
-                            <div style="margin-top: 1rem;">
-                                <h4>📊 Recent Activity Log</h4>
-                                <div style="background: #f8f9fa; padding: 1rem; border-radius: 6px; font-family: monospace; font-size: 0.8rem; max-height: 200px; overflow-y: auto;">
-                                    <div>2025-01-07 14:23:15 - Employee import completed: 157 records</div>
-                                    <div>2025-01-07 14:18:42 - Data validation started</div>
-                                    <div>2025-01-07 14:15:33 - File received: employee_updates.csv</div>
-                                    <div>2025-01-07 13:45:12 - Benefits sync failed: API timeout</div>
-                                    <div>2025-01-07 13:30:00 - Scheduled payroll sync initiated</div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div style="margin-top: 2rem;">
-                        <h3>🛠️ Integration Configuration</h3>
-                        <div style="background: #f8f9fa; padding: 1.5rem; border-radius: 8px;">
-                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1rem;">
-                                <div>
-                                    <label><strong>Source System:</strong></label>
-                                    <select style="width: 100%; padding: 0.5rem; border: 1px solid #ccc; border-radius: 4px;">
-                                        <option>Insperity HRIS</option>
-                                        <option>ADP Workforce</option>
-                                        <option>BambooHR</option>
-                                    </select>
-                                </div>
-                                <div>
-                                    <label><strong>Sync Frequency:</strong></label>
-                                    <select style="width: 100%; padding: 0.5rem; border: 1px solid #ccc; border-radius: 4px;">
-                                        <option>Real-time</option>
-                                        <option>Hourly</option>
-                                        <option>Daily</option>
-                                        <option>Weekly</option>
-                                    </select>
-                                </div>
-                                <div>
-                                    <label><strong>Error Handling:</strong></label>
-                                    <select style="width: 100%; padding: 0.5rem; border: 1px solid #ccc; border-radius: 4px;">
-                                        <option>Stop on Error</option>
-                                        <option>Skip Invalid Records</option>
-                                        <option>Log and Continue</option>
-                                    </select>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            `;
-            
-            document.getElementById('results').innerHTML = integrationHTML;
-            
-            // Add file upload functionality
-            const fileInput = document.getElementById('fileInput');
-            const uploadArea = document.getElementById('uploadArea');
-            
-            fileInput.addEventListener('change', handleFileSelect);
-            uploadArea.addEventListener('dragover', handleDragOver);
-            uploadArea.addEventListener('drop', handleFileDrop);
-        }
-        
-        // Report Writer Simulation
-        function showReportWriter() {
-            if (!isConnected) {
-                showError('Please connect to the database first');
-                return;
-            }
-            
-            const reportHTML = `
-                <div class="results">
-                    <h2>📋 Workday Report Writer & Calculated Fields</h2>
-                    <p>Build custom reports with advanced calculations and business logic</p>
-                    
-                    <div class="report-builder">
-                        <h3>🏗️ Report Builder</h3>
-                        <div style="margin: 1rem 0;">
-                            <label><strong>Report Name:</strong></label>
-                            <input type="text" id="reportName" value="Benefits Cost Analysis by Department" 
-                                   style="width: 100%; padding: 0.5rem; border: 1px solid #ccc; border-radius: 4px; margin: 0.5rem 0;">
-                        </div>
-                        
-                        <div class="field-selector">
-                            <div class="field-group">
-                                <h4>👥 Employee Fields</h4>
-                                <label class="field-checkbox">
-                                    <input type="checkbox" checked> Employee ID
-                                </label>
-                                <label class="field-checkbox">
-                                    <input type="checkbox" checked> Full Name
-                                </label>
-                                <label class="field-checkbox">
-                                    <input type="checkbox" checked> Department
-                                </label>
-                                <label class="field-checkbox">
-                                    <input type="checkbox"> Job Title
-                                </label>
-                                <label class="field-checkbox">
-                                    <input type="checkbox" checked> Hire Date
-                                </label>
-                                <label class="field-checkbox">
-                                    <input type="checkbox" checked> Salary
-                                </label>
-                            </div>
-                            
-                            <div class="field-group">
-                                <h4>💰 Benefits Fields</h4>
-                                <label class="field-checkbox">
-                                    <input type="checkbox" checked> Plan Type
-                                </label>
-                                <label class="field-checkbox">
-                                    <input type="checkbox" checked> Employee Premium
-                                </label>
-                                <label class="field-checkbox">
-                                    <input type="checkbox" checked> Employer Premium
-                                </label>
-                                <label class="field-checkbox">
-                                    <input type="checkbox"> Enrollment Date
-                                </label>
-                                <label class="field-checkbox">
-                                    <input type="checkbox"> Coverage Level
-                                </label>
-                            </div>
-                            
-                            <div class="field-group">
-                                <h4>🏢 Company Fields</h4>
-                                <label class="field-checkbox">
-                                    <input type="checkbox" checked> Company Name
-                                </label>
-                                <label class="field-checkbox">
-                                    <input type="checkbox"> Industry
-                                </label>
-                                <label class="field-checkbox">
-                                    <input type="checkbox"> Go-Live Date
-                                </label>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="calculated-field">
-                        <h4>🧮 Calculated Fields</h4>
-                        <p>Custom business logic calculations using Workday formula syntax</p>
-                        
-                        <div style="margin: 1rem 0;">
-                            <strong>Years of Service:</strong>
-                            <div class="formula-display">
-                                DATEDIF(Employee.Hire_Date, TODAY(), "Y")
-                            </div>
-                        </div>
-                        
-                        <div style="margin: 1rem 0;">
-                            <strong>Benefits Cost as % of Salary:</strong>
-                            <div class="formula-display">
-                                ROUND((Benefits.Employee_Premium * 12) / Employee.Annual_Salary * 100, 2)
-                            </div>
-                        </div>
-                        
-                        <div style="margin: 1rem 0;">
-                            <strong>Total Compensation:</strong>
-                            <div class="formula-display">
-                                Employee.Annual_Salary + (Benefits.Employer_Premium * 12) + 
-                                IF(Benefits.Plan_Type = "HEALTH", 2000, 0)
-                            </div>
-                        </div>
-                        
-                        <div style="margin: 1rem 0;">
-                            <strong>Tenure Category:</strong>
-                            <div class="formula-display">
-                                IF(YEARS_SERVICE < 1, "New Hire",
-                                   IF(YEARS_SERVICE < 3, "Early Career",
-                                      IF(YEARS_SERVICE < 7, "Mid Career", "Senior")))
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div style="margin: 2rem 0;">
-                        <h3>📊 Report Parameters</h3>
-                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem; background: #f8f9fa; padding: 1.5rem; border-radius: 8px;">
-                            <div>
-                                <label><strong>Date Range:</strong></label>
-                                <select style="width: 100%; padding: 0.5rem; border: 1px solid #ccc; border-radius: 4px;">
-                                    <option>Current Year</option>
-                                    <option>Last 12 Months</option>
-                                    <option>Year to Date</option>
-                                    <option>Custom Range</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label><strong>Department:</strong></label>
-                                <select style="width: 100%; padding: 0.5rem; border: 1px solid #ccc; border-radius: 4px;">
-                                    <option>All Departments</option>
-                                    <option>Engineering</option>
-                                    <option>Sales</option>
-                                    <option>Marketing</option>
-                                    <option>HR</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label><strong>Employee Status:</strong></label>
-                                <select style="width: 100%; padding: 0.5rem; border: 1px solid #ccc; border-radius: 4px;">
-                                    <option>Active Only</option>
-                                    <option>All Statuses</option>
-                                    <option>Terminated</option>
-                                    <option>On Leave</option>
-                                </select>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div style="text-align: center; margin: 2rem 0;">
-                        <button class="btn" onclick="generateReport()" style="margin: 0 10px;">🚀 Generate Report</button>
-                        <button class="btn" onclick="exportReport()" style="margin: 0 10px;">📁 Export to Excel</button>
-                        <button class="btn" onclick="scheduleReport()" style="margin: 0 10px;">⏰ Schedule Report</button>
-                    </div>
-                    
-                    <div id="reportPreview" style="display: none;">
-                        <h3>📋 Report Preview</h3>
-                        <div class="table-container">
-                            <table>
-                                <thead>
-                                    <tr>
-                                        <th>EMPLOYEE</th>
-                                        <th>DEPARTMENT</th>
-                                        <th>YEARS OF SERVICE</th>
-                                        <th>ANNUAL SALARY</th>
-                                        <th>BENEFITS COST</th>
-                                        <th>% OF SALARY</th>
-                                        <th>TOTAL COMPENSATION</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr>
-                                        <td>John Smith</td>
-                                        <td>Engineering</td>
-                                        <td>2.9</td>
-                                        <td>$75,000</td>
-                                        <td>$1,740</td>
-                                        <td>2.32%</td>
-                                        <td>$79,560</td>
-                                    </tr>
-                                    <tr>
-                                        <td>Sarah Johnson</td>
-                                        <td>Engineering</td>
-                                        <td>2.7</td>
-                                        <td>$95,000</td>
-                                        <td>$6,540</td>
-                                        <td>6.88%</td>
-                                        <td>$107,840</td>
-                                    </tr>
-                                    <tr>
-                                        <td>Mike Davis</td>
-                                        <td>Sales</td>
-                                        <td>1.0</td>
-                                        <td>$65,000</td>
-                                        <td>$1,440</td>
-                                        <td>2.22%</td>
-                                        <td>$71,040</td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-            `;
-            
-            document.getElementById('results').innerHTML = reportHTML;
-        }
-        
-        // File handling functions
-        function handleFileSelect(event) {
-            const file = event.target.files[0];
-            if (file) {
-                displayFileInfo(file);
-            }
-        }
-        
-        function handleDragOver(event) {
-            event.preventDefault();
-            event.currentTarget.classList.add('dragover');
-        }
-        
-        function handleFileDrop(event) {
-            event.preventDefault();
-            event.currentTarget.classList.remove('dragover');
-            const file = event.dataTransfer.files[0];
-            if (file) {
-                displayFileInfo(file);
-            }
-        }
-        
-        function displayFileInfo(file) {
-            const fileDetails = document.getElementById('fileDetails');
-            const fileStats = document.getElementById('fileStats');
-            
-            // Simulate file analysis
-            const stats = `
-                <p><strong>📄 File:</strong> ${file.name}</p>
-                <p><strong>📊 Size:</strong> ${(file.size / 1024).toFixed(1)} KB</p>
-                <p><strong>📅 Modified:</strong> ${new Date(file.lastModified).toLocaleDateString()}</p>
-                <p><strong>🔢 Estimated Rows:</strong> ${Math.floor(Math.random() * 500) + 100}</p>
-                <p><strong>📋 Columns Detected:</strong> Employee_ID, First_Name, Last_Name, Department, Salary, Hire_Date</p>
-                <p><strong>✅ Validation Status:</strong> <span class="status-indicator status-success">PASSED</span></p>
-            `;
-            
-            fileStats.innerHTML = stats;
-            fileDetails.style.display = 'block';
-        }
-        
-        // Report functions
-        window.generateReport = function() {
-            const preview = document.getElementById('reportPreview');
-            preview.style.display = 'block';
-            preview.scrollIntoView({ behavior: 'smooth' });
-        }
-        
-        window.exportReport = function() {
-            showSuccess('Report exported to Excel successfully! (This would download a .xlsx file in a real system)');
-        }
-        
-        window.scheduleReport = function() {
-            showSuccess('Report scheduled to run weekly on Mondays at 9:00 AM. Email notifications enabled.');
-        }
-        
-        window.simulateDataImport = function() {
-            showLoading(true);
-            
-            // Simulate import process
-            setTimeout(() => {
-                const importResults = `
-                    <div class="results">
-                        <h2>📥 Data Import Results</h2>
-                        <div class="progress-bar">
-                            <div class="progress-fill" style="width: 100%;">COMPLETED</div>
-                        </div>
-                        
-                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin: 2rem 0;">
-                            <div class="metric-card">
-                                <div class="metric-value">247</div>
-                                <div class="metric-label">Records Processed</div>
-                            </div>
-                            <div class="metric-card">
-                                <div class="metric-value">245</div>
-                                <div class="metric-label">Successfully Imported</div>
-                            </div>
-                            <div class="metric-card">
-                                <div class="metric-value">2</div>
-                                <div class="metric-label">Validation Errors</div>
-                            </div>
-                            <div class="metric-card">
-                                <div class="metric-value">0</div>
-                                <div class="metric-label">System Errors</div>
-                            </div>
-                        </div>
-                        
-                        <div style="background: #fff3cd; border: 1px solid #ffeaa7; padding: 1rem; border-radius: 8px; margin: 1rem 0;">
-                            <h4 style="color: #856404; margin: 0 0 0.5rem 0;">⚠️ Validation Issues Found:</h4>
-                            <ul style="margin: 0; color: #856404;">
-                                <li>Row 23: Employee ID 'EMP-00156' - Invalid SSN format</li>
-                                <li>Row 187: Sarah Martinez - Hire date is in the future</li>
-                            </ul>
-                        </div>
-                        
-                        <p style="color: #155724; background: #d4edda; padding: 1rem; border-radius: 8px;">
-                            <strong>✅ Import completed successfully!</strong> 245 employee records have been updated in Workday.
-                            Integration log has been saved and error notifications sent to HR team.
-                        </p>
-                    </div>
-                `;
-                
-                document.getElementById('results').innerHTML = importResults;
-                showLoading(false);
-            }, 3000);
-        }
-        
-        // Update connection status indicator
-        function updateConnectionStatus(connected) {
-            const status = document.getElementById('connectionStatus');
-            if (connected) {
-                status.className = 'connection-status connected';
-                status.textContent = 'Database Connected';
-            } else {
-                status.className = 'connection-status disconnected';
-                status.textContent = 'Database Disconnected';
-            }
-        }
-        
-        // Show/hide loading indicator
-        function showLoading(show) {
-            document.getElementById('loading').style.display = show ? 'block' : 'none';
-        }
-        
-        // Show error message
-        function showError(message) {
-            const resultsDiv = document.getElementById('results');
-            resultsDiv.innerHTML = `<div class="error"><strong>Error:</strong> ${message}</div>`;
-        }
-        
-        // Show success message
-        function showSuccess(message) {
-            const resultsDiv = document.getElementById('results');
-            resultsDiv.innerHTML = `<div class="success"><strong>Success:</strong> ${message}</div>`;
-        }
-        
-        // Display query results in a formatted table
-        function displayResults(data, title, description) {
-            if (!data || data.length === 0) {
-                document.getElementById('results').innerHTML = `
-                    <div class="results">
-                        <h2>${title}</h2>
-                        <p>${description}</p>
-                        <p><em>No data returned from query.</em></p>
-                    </div>
-                `;
-                return;
-            }
-            
-            const columns = Object.keys(data[0]);
-            
-            let tableHTML = `
-                <div class="results">
-                    <h2>${title}</h2>
-                    <p>${description}</p>
-                    
-                    <div class="metric-card">
-                        <div class="metric-value">${data.length}</div>
-                        <div class="metric-label">Issues Found</div>
-                    </div>
-                    
-                    <div class="table-container">
-                        <table>
-                            <thead>
-                                <tr>
-                                    ${columns.map(col => `<th>${col.replace(/_/g, ' ').toUpperCase()}</th>`).join('')}
-                                </tr>
-                            </thead>
-                            <tbody>
-                                ${data.map(row => `
-                                    <tr>
-                                        ${columns.map(col => `<td>${row[col] || ''}</td>`).join('')}
-                                    </tr>
-                                `).join('')}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            `;
-            
-            document.getElementById('results').innerHTML = tableHTML;
-        }
-        
-        // Data Quality Audit Query
-        async function runDataQualityAudit() {
-            if (!isConnected) {
-                showError('Please connect to the database first');
-                return;
-            }
-            
-            try {
-                showLoading(true);
-                
-                const { data, error } = await supabase.rpc('execute_data_quality_audit');
-                
-                if (error) {
-                    // If the function doesn't exist, run the query directly
-                    const { data: rawData, error: queryError } = await supabase
-                        .from('employees')
-                        .select(`
-                            employee_id,
-                            first_name,
-                            last_name,
-                            ssn,
-                            status,
-                            clients(company_name)
-                        `);
-                    
-                    if (queryError) throw queryError;
-                    
-                    // Process the data to find issues
-                    const issues = [];
-                    rawData.forEach(emp => {
-                        if (!emp.ssn) {
-                            issues.push({
-                                company_name: emp.clients.company_name,
-                                issue_type: 'Missing/Invalid SSN',
-                                priority: 'HIGH',
-                                affected_employees: `${emp.first_name} ${emp.last_name}`,
-                                issue_count: 1
-                            });
-                        }
-                    });
-                    
-                    displayResults(issues, 
-                        '🔍 Data Quality Audit Results', 
-                        'This query automates the manual data audits I performed at Insperity, identifying discrepancies that could cause compliance issues or billing errors.'
-                    );
-                } else {
-                    displayResults(data, 
-                        '🔍 Data Quality Audit Results', 
-                        'This query automates the manual data audits I performed at Insperity, identifying discrepancies that could cause compliance issues or billing errors.'
-                    );
-                }
-                
-            } catch (error) {
-                console.error('Query error:', error);
-                showError('Failed to execute query: ' + error.message);
-            } finally {
-                showLoading(false);
-            }
-        }
-        
-        // Benefits Cost Analysis Query
-        async function runCostAnalysis() {
-            if (!isConnected) {
-                showError('Please connect to the database first');
-                return;
-            }
-            
-            try {
-                showLoading(true);
-                
-                const { data, error } = await supabase
-                    .from('clients')
-                    .select(`
-                        company_name,
-                        employees!inner(
-                            employee_id,
-                            salary,
-                            payroll_records(
-                                pre_tax_deductions,
-                                gross_pay
-                            )
-                        )
-                    `);
-                
-                if (error) throw error;
-                
-                // Process the data
-                const costAnalysis = data.map(client => {
-                    let totalDeductions = 0;
-                    let totalGross = 0;
-                    let employeeCount = 0;
-                    
-                    client.employees.forEach(emp => {
-                        if (emp.payroll_records && emp.payroll_records.length > 0) {
-                            employeeCount++;
-                            emp.payroll_records.forEach(record => {
-                                totalDeductions += parseFloat(record.pre_tax_deductions || 0);
-                                totalGross += parseFloat(record.gross_pay || 0);
-                            });
-                        }
-                    });
-                    
-                    return {
-                        company_name: client.company_name,
-                        active_employees: employeeCount,
-                        total_benefits_deductions: totalDeductions.toFixed(2),
-                        avg_benefits_per_employee: employeeCount > 0 ? (totalDeductions / employeeCount).toFixed(2) : '0.00',
-                        benefits_percentage_of_gross: totalGross > 0 ? ((totalDeductions / totalGross) * 100).toFixed(2) : '0.00'
-                    };
-                }).filter(item => item.active_employees > 0);
-                
-                displayResults(costAnalysis,
-                    '📊 Benefits Cost Analysis',
-                    'Advanced cost analysis showing benefits spending patterns across multiple client companies.'
-                );
-                
-            } catch (error) {
-                console.error('Query error:', error);
-                showError('Failed to execute query: ' + error.message);
-            } finally {
-                showLoading(false);
-            }
-        }
-        
-        // Demographic Analysis Query
-        async function runDemographicAnalysis() {
-            if (!isConnected) {
-                showError('Please connect to the database first');
-                return;
-            }
-            
-            try {
-                showLoading(true);
-                
-                const { data, error } = await supabase
-                    .from('employees')
-                    .select(`
-                        employee_id,
-                        salary,
-                        status,
-                        clients(company_name),
-                        enrollments!inner(enrollment_id, status)
-                    `)
-                    .eq('status', 'ACTIVE');
-                
-                if (error) throw error;
-                
-                // Process the data into salary bands
-                const demographics = {};
-                
-                data.forEach(emp => {
-                    const company = emp.clients.company_name;
-                    let salaryBand;
-                    
-                    if (emp.salary < 50000) salaryBand = 'Under $50K';
-                    else if (emp.salary <= 75000) salaryBand = '$50K-$75K';
-                    else if (emp.salary <= 100000) salaryBand = '$75K-$100K';
-                    else salaryBand = 'Over $100K';
-                    
-                    const key = `${company}|${salaryBand}`;
-                    if (!demographics[key]) {
-                        demographics[key] = {
-                            company_name: company,
-                            salary_band: salaryBand,
-                            employee_count: 0,
-                            enrolled_employees: 0,
-                            avg_salary: 0,
-                            totalSalary: 0
-                        };
-                    }
-                    
-                    demographics[key].employee_count++;
-                    demographics[key].totalSalary += emp.salary;
-                    
-                    if (emp.enrollments && emp.enrollments.length > 0) {
-                        demographics[key].enrolled_employees++;
-                    }
-                });
-                
-                // Convert to array and calculate final values
-                const result = Object.values(demographics).map(item => ({
-                    company_name: item.company_name,
-                    salary_band: item.salary_band,
-                    employee_count: item.employee_count,
-                    enrolled_employees: item.enrolled_employees,
-                    enrollment_rate_percent: ((item.enrolled_employees / item.employee_count) * 100).toFixed(1),
-                    avg_salary: Math.round(item.totalSalary / item.employee_count)
-                }));
-                
-                displayResults(result,
-                    '👥 Demographic Analysis',
-                    'Complex demographic breakdown showing benefits utilization patterns by salary bands.'
-                );
-                
-            } catch (error) {
-                console.error('Query error:', error);
-                showError('Failed to execute query: ' + error.message);
-            } finally {
-                showLoading(false);
-            }
-        }
+
+        // In your uploadToSupabase, after a successful upload, add:
+        // enableDownloadButton();
+
+        // [Rest of the script: tab switching, file preview, data transformation, error handling, etc., unchanged except
+        // for event => event in tab switching functions and download code!]
+
+        // If you want, you can paste your entire script here and I can "fix" or streamline specific logic on request.
+
     </script>
 </body>
 </html>
